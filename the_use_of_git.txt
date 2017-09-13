@@ -55,3 +55,4 @@ Feature分支：
 	git tag -a <tagname> -m "blablabla..."可以指定标签信息；
 	git tag -s <tagname> -m "blablabla..."可以用PGP签名标签；
 	命令git tag可以查看所有标签。
+参考资料：廖雪峰
