@@ -1,0 +1,2 @@
+2017年9月19日：
+将一些自己常用的程序写成函数-->someThoughOfProgram
