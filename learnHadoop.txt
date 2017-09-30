@@ -7,6 +7,7 @@ hadoop导入eclipse后bin下的脚本以及其他文件会消失
 	解决方法：尚未解决
 could only be replicated to 0 nodes, instead of 1
 	解决方法：
+hadoop1.x.x搭配Java7  hadoop2.x.x搭配Java8
 
 		
 	
