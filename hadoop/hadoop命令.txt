@@ -1,0 +1,201 @@
+所有hadoop命令都由bin / hadoop脚本调用。运行没有任何参数的hadoop脚本会打印所有命令的描述。
+
+Usage: hadoop jar <jar> [mainClass] args to Runs a jar file.
+Use yarn jar to launch YARN applications instead.
+
+hadoop Filesystem shell:
+bin/hadoop fs <args>
+
+	cat(复制)
+
+	用法：hadoop fs -cat [-ignoreCrc] 路径A 路径B
+
+	将路径A复制到路径B。
+
+	选项
+
+	该-ignoreCrc选项禁用checkshum验证。
+	例：
+
+	hadoop fs -cat hdfs：//nn1.example.com/file1 hdfs：//nn2.example.com/file2
+	退出代码：
+
+	成功返回0，错误返回-1。
+	
+	校验	
+
+	用法：hadoop fs -checksum URI
+
+	返回文件的校验和信息。
+
+	例：
+
+	hadoop fs -checksum hdfs：//nn1.example.com/file1
+	hadoop fs -checksum文件：/// etc / hosts
+	
+	
+	chgrp命令
+
+	用法：hadoop fs -chgrp [-R] GROUP URI [URI ...]
+
+	更改文件组的关联。用户必须是文件的所有者，否则是超级用户。附加信息在“ 权限指南”中。
+
+	选项
+
+	-R选项将通过目录结构递归地进行更改。
+	
+	CHMOD
+
+	用法：hadoop fs -chmod [-R] <MODE [，MODE] ... | OCTALMODE> URI [URI ...]
+
+	更改文件的权限。使用-R，通过目录结构递归地进行更改。用户必须是文件的所有者，否则是超级用户。附加信息在“ 权限指南”中。
+
+	选项
+
+	-R选项将通过目录结构递归地进行更改。
+	
+	CHOWN
+
+	用法：hadoop fs -chown [-R] [OWNER] [：[GROUP]] URI [URI]
+
+	更改文件的所有者。用户必须是超级用户。附加信息在“ 权限指南”中。
+
+	选项
+
+	-R选项将通过目录结构递归地进行更改。
+	
+	CP
+
+	用法：hadoop fs -cp [-f] [-p | -p [topax]] URI [URI ...] <dest>
+
+	将文件从源文件复制到目的地。此命令还允许多个源，在这种情况下，目标必须是目录。
+
+	如果（1）源文件系统和目标文件系统支持（仅HDFS），则原始* *命名空间扩展属性将被保留，（2）所有源目标路径名和目标路径名都在/.reserved/raw层次结构中。是否保留raw *命名空间xattrs的确定与-p（保留）标志无关。
+
+	选项：
+
+	-f选项将覆盖目的地（如果它已经存在）。
+	-p选项将保留文件属性[topx]（时间戳，所有权，权限，ACL，XAttr）。如果-p指定为无参数，则保留时间戳，所有权，权限。如果指定-pa，那么由于ACL是一组超级权限，因此保留权限。是否保留原始命名空间扩展属性的确定与-p标志无关。
+	例：
+
+	hadoop fs -cp / user / hadoop / file1 / user / hadoop / file2
+	hadoop fs -cp / user / hadoop / file1 / user / hadoop / file2 / user / hadoop / dir
+	退出代码：
+
+	成功返回0，错误返回-1。
+	
+	
+	get(从分拣系统中将文件下载下来)
+
+	用法：hadoop fs -get [-ignorecrc] [-crc] [-p] [-f] <src> <localdst>
+
+	将文件复制到本地文件系统。可能使用-ignorecrc选项复制CRC校验失败的文件。文件和CRC可以使用-crc选项进行复制。
+
+	例：
+
+	hadoop fs -get / user / hadoop / file本地文件
+	hadoop fs -get hdfs：//nn.example.com/user/hadoop/file localfile
+	退出代码：
+
+	成功返回0，错误返回-1。
+
+	选项：
+
+	-p：保留访问和修改时间，所有权和权限。（假设权限可以跨文件系统传播）
+	-f：覆盖目的地（如果已经存在）。
+	-ignorecrc：跳过对下载的文件进行CRC校验。
+	-crc：为下载的文件写CRC校验和。
+	
+	
+	LS（查看目录）
+
+	用法：hadoop fs -ls [-d] [-h] [-R] <args>
+
+	选项：
+
+	-d：目录列为纯文件。
+	-h：以人类可读的方式格式化文件大小（例如，64.0m而不是67108864）。
+	-R：递归列出遇到的子目录。
+	对于文件，ls以文件形式返回stat，格式如下：
+		权限number_of_replicas userid groupid filesize modify_date modify_time filename
+	对于一个目录，它返回其直接子代的列表，就像Unix一样。目录列为：
+		权限userid groupid modify_date modify_time dirname
+	默认情况下，目录中的文件按文件名顺序排列。
+
+	例：
+
+	hadoop fs -ls /user/hadoop/file1
+	
+	退出代码：成功返回0，错误返回-1。
+	
+	MKDIR(新建目录)
+	用法：hadoop fs -mkdir [-p] <paths>
+
+	以路径uri为参数，创建目录。
+
+	选项：
+
+		-p选项行为非常像Unix mkdir -p，沿路径创建父目录。
+	例：
+		hadoop fs -mkdir /user/hadoop/dir1/user/hadoop/dir2
+		hadoop fs -mkdir hdfs://nn1.example.com/user/hadoop/dir hdfs://nn2.example.com/user/hadoop/dir
+	退出代码：成功返回0，错误返回-1。
+	
+	MV(文件移动)
+
+	用法：hadoop fs -mv URI [URI ...] <dest>
+
+	将文件从源移动到目标。此命令还允许多个源，在这种情况下，目标需要是目录。不允许跨文件系统移动文件。
+
+	例：
+
+	hadoop fs -mv/user/hadoop/file1/user/hadoop/file2
+	hadoop fs -mv hdfs://nn.example.com/file1 hdfs://nn.example.com/file2 hdfs://nn.example.com/file3 hdfs://nn.example.com/dir1
+	退出代码：成功返回0，错误返回-1。
+
+	put(将文件上传到文件系统中)
+
+	用法：hadoop fs -put [-f] [-p] [-l] [-d] [ - | <localsrc1> ..]。<DST>
+
+	将单个src或多个srcs从本地文件系统复制到目标文件系统。如果源设置为“ - ”，则还从stdin读取输入并写入目标文件系统
+
+	如果文件已经存在，则复制失败，除非给出-f标志。
+
+	选项：
+
+		-p：保留访问和修改时间，所有权和权限。（假设权限可以跨文件系统传播）
+		-f：覆盖目的地（如果已经存在）。
+		-l：允许DataNode将文件延续到磁盘，强制复制系数为1.此标志将导致持久性降低。小心使用。
+		-d：跳过使用后缀._COPYING_创建临时文件。
+	例子：
+
+	hadoop fs -put localfile /user/hadoop/hadoopfile
+	hadoop fs -put -f localfile1 localfile2 /user/hadoop/hadoopdir
+	hadoop fs -put -d localfile hdfs://nn.example.com/hadoop/hadoopfile
+	hadoop fs -put - hdfs://nn.example.com/hadoop/hadoopfile                #从stdin读取输入。
+	退出代码：成功返回0，错误返回-1。
+	
+	RM(文件删除)
+
+	用法：hadoop fs -rm [-f] [-r | -R] [-skipTrash] URI [URI ...]
+
+	删除指定为args的文件。
+
+	如果垃圾桶已启用，文件系统将删除的文件移动到垃圾桶目录（由FileSystem＃getTrashRoot提供）。
+
+	目前，垃圾邮件功能默认是禁用的。用户可以通过为参数fs.trash.interval（在core-site.xml中）设置一个大于零的值来启用垃圾箱。
+
+	请参阅删除垃圾桶中的文件。
+
+	选项：
+
+	如果文件不存在，-f选项将不显示诊断消息或修改退出状态以反映错误。
+	-R选项会递归地删除目录及其下的任何内容。
+	-r选项等效于-R，要删除文件夹请使用-r参数
+	-skipTrash选项将绕过垃圾箱，如果启用，并立即删除指定的文件。当需要从超配额目录中删除文件时，这可能很有用。
+	例：
+
+	hadoop fs -rm hdfs：//nn.example.com/file / user / hadoop / emptydir
+	退出代码：成功返回0，错误返回-1。
+	
+	
