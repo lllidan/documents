@@ -1,0 +1,16 @@
+-------------------20170925------------
+hadoop无法以 start-all.h启动
+    解决方法：(查看hadoop目录下的logs文件夹中的日志信息
+        1、检查配置文件是否书写正确
+		2、重新格式化
+hadoop导入eclipse后bin下的脚本以及其他文件会消失
+	解决方法：尚未解决
+could only be replicated to 0 nodes, instead of 1
+	解决方法：
+hadoop1.x.x搭配Java7  hadoop2.x.x搭配Java8
+hadoop2.x.x的二次的eclipse插件应该可以通用：我的hadoop版本是2.7.4，eclipse版本是oxygen，安装的插件是网上编译好的2.6.0的插件，目前可以正常使用，
+没有发现问题。
+
+
+		
+	
