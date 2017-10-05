@@ -1,0 +1,290 @@
+    经过好长时间的折腾，终于基本上把hadoop的伪分布式开发环境搭建完成,wordcount程序也可以运行了。
+    现在分享一下搭建的过程以及一些问题（当时遇到有好多的问题，不过好多都忘了，看的写吧）
+    参考资料：http://www.powerxing.com/ 给力星。这个学长的配置很详细，可以直接按照他上面的操作配置，完全可以成功。我写的大部分也是基于他的文章进行修改的，应该不侵权哇。
+    首先是操作系统的选择。没有mac，所以也就是在Windows和Ubuntu之间选择。教程中推荐的是Linux系统，所以大概有这么几种方式：1、最普遍的方式:在window上的虚拟机上跑一个Linux系统 2、使用cygwin在Windows上模拟 3、在电脑的硬盘上安装一个Linux系统
+    这三种方式我都试过,第二种是我借阅的参考书上推荐的方式,但经过我的使用,觉得第二种方式是最不好的方式.主要是因为这种在Windows上模拟的方式模拟的不完全,特别是文件权限方面有比较大的不足,使得在配置信息出现了很多难以解决的文件权限管理的问题.当然也有可能是因为自己Windows操作水平也有限的原因,所以推荐使用第一种或者第三种方式,也就是说最好在Linux系统上操作hadoop,这两种方式经过我的测试,都可以完成部署.
+    其次是hadoop版本的选择,一共有两个大的版本选择:1.x.x和2.x.x。这两者各有的特点,hadoop1(1.x.x)版本的特点是稳定,不会再继续更新。市面上的书籍（我参阅过的）也都是以1为主吧。
+    hadoop2比较新一些，在以后的更新中可能还要继续更改，使用的框架模式也较1有所不同。
+    因为我的参考书都是介绍hadoop1.0.0的，所以开始我选择的版本是hadoop1.0.0，但配置中遇到了很多的问题，而且在网上查阅相关资料，发现现在很多大公司的主流版本都是hadoop2.x.x,所以最后我更换成了2的版本。当然，1的版本我也进行过配置，最后也可以行得通。经过比较，我感觉hadoop1.0.0适配与jdk1.7，而hadoop2则适配jdk1.8的版本。如果对应java版本不匹配的话，可能在运行hadoop时出现找不到对应方法的问题。
+    综上，我使用的hadoop版本是hadoop2.7.4，jdk的大版本是jdk1.8（在下载jdk的时候，在oracle的官网上好像已经放出1.9的版本了，更新的好快）
+    贴两个官方的教程：
+    http://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html --Linux版
+    https://wiki.apache.org/hadoop/Hadoop2OnWindows --forWindows
+
+    1、创建一个名为hadoop的用户来进行相关的操作：
+    命令:
+    	sudo useradd -m hadoop -s /bin/bash
+    	sudo passwd hadoop
+    	sudo adduser hadoop sudo
+	第一条语句是创建一个名为hadoop的用户
+	第二条语句是为hadoop用户设置一个密码,当你输入这条语句后，会先让你输入当前用户的密码。然后在输入两次hadoop用户的密码。（最好不要和当前用户一样，也不要和root密码一样，可能会出错）
+	第三条语句可为 hadoop 用户增加管理员权限，方便部署。
+	在完成了这三步操作后，注销当前用户（点击屏幕右上角的齿轮，选择注销），在登陆界面使用刚创建的 hadoop 用户进行登陆。
+
+    接下来是一些依赖软件的安装：
+	sudo apt-get update                      # 安装器更新
+	sudo apt-get install vim                 # 安装vim
+	sudo apt-get install openssh-server      # 安装SSHserver
+	ssh localhost                            # 测试登录到本机，验证SSHserver是否安装成功
+	exit                                     # 退出刚才的 ssh localhost
+	cd ~/.ssh/                               # 若没有该目录，请先执行一次ssh localhost
+	ssh-keygen -t rsa                        # 会有提示，都按回车就可以
+	cat ./id_rsa.pub >> ./authorized_keys    # 加入授权
+	ssh localhost                            # 再次测试登录到本机，看是否完成免密登录设置
+
+	在依赖软件安装完毕后，就是主要功能的安装部署了：
+	1、jdk1.8的安装：--自行百度
+	    百度上有很多的教程，因为我们安装的oracle版本的jdk，基本步骤就是去官方下载Linux版本的jdk，解压放在一个目录中，然后配置一下环境变量就可以了。
+    	有几点说一下：1、最好将解压完的的jdk压缩包放在/usr/lib/jvm下，/usr/lib是系统自动产生的，如果你是解压到这里，可以先新建一个文件夹，然后将解压完的文件夹放到这里。这些操作都可以通过命令完成，具体的命令上网查询，注意要
+	/etc/profile:
+	#set java environment  
+	export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_144
+	export ANT_HOME=/home/hadoop/ant1.10.1
+	export JRE_HOME=${JAVA_HOME}/jre
+	export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+
+	~/.bashrc:
+	export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_144
+	export JRE=/usr/lib/jvm/jdk1.8.0_144/jre
+
+	网上说只要配置一个应该就可以了，但是我开始只mZ了一个，结果时不时就会报出java找不到的错误，现在懒得看Linux的环境变量配置方法，以后有时间再学习，现在先把两个环境变量都配置完毕，以后再择机修改。
+	source 文件名可以重载文件，比如source ~/.bashrc 就可以将修改完的文件重新载入，再输入java -version俩查看java版本。（个人体验，如果没有重启，只是执行命令的话，只会导入输入source命令的终端中，其他的终端没有响应）如果配置无误，会打印出java的版本号。
+   2、hadoop的安装
+   		先下载:贴两个网址http://mirror.bit.edu.cn/apache/hadoop/common/ 或者 http://mirrors.cnnic.cn/apache/hadoop/common/，作为初学者，为了减少发生因为程序本身的问题而导致的错误，尽量使用稳定版的下载，也就是选择stable文件夹下的内容下载。我下载的是hadoop-2.7.4.tar.gz 这是编译好的版本。还有一种名为hadoop-2.7.4-src.tar.gz的版本，这是hadoop的源码，需要经过编译之后才可以继续运行。
+   		下载完成后，我们将hadoop解压（相当于安装）到/usr/local/中，
+   		sudo tar -zxf ~/下载/hadoop-2.6.0.tar.gz -C /usr/local    # 解压到/usr/local中
+	    cd /usr/local/  										 # 打开解压的位置
+    	sudo mv ./hadoop-2.6.0/ ./hadoop            			 # 将文件夹名改为hadoop
+    	sudo chown -R hadoop ./hadoop       					 # 修改文件权限（vital）、
+    	以上的各部都有相应的说明来指示用途。我只说一点，最后一部很重要，如果没有相应的权限的话，在后面的数据格式化时会报没有权限的错误。所以我推荐新手在安装的时候就和教程安装在同一目录下，否则这个权限修改的命令有错误，而且这个命令有一定的危险性，如果输入错误的话可能导致整个系统的崩溃。
+  	    cd /usr/local/hadoop
+	    ./bin/hadoop version
+	    这两条命令是检查hadoop是否成功安装的，如果一切配置安装正确，会打印hadoop的版本号。
+	    
+	3、hadoop的单机检测：
+		通过运行一个单机的例子，来检测hadoop的逻辑部分是否成功的安装。
+		
+		cd /usr/local/hadoop
+    	mkdir ./input
+    	cp ./etc/hadoop/*.xml ./input   # 将配置文件作为输入文件
+    	./bin/hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar grep ./input ./output 'dfs[a-z.]+'
+    	cat ./output/*          # 查看运行结果
+    	
+    	如果之前的配置正确，而且文件完整的话，先会在终端中打印出程序运行经过，在输入 cat ./output/* 后打印结果:
+    	1			dfsadmin
+    4、hadoop的伪分布配置：（我觉得重要）
+        这一部分是hadoop的核心，因为在日后的实际应用中，hadoop都要配置成多节点分布式的模式的，只有将配置文件搞对，下发的任务才能顺利完成，这也是我折腾时间最长的地方。
+        我就直接贴我的配置了，和教程有所不同的是，我在配置文件中加入了有关内存分配的内容，没有这些东西，虽然hadoop的相关内容可以顺利跑起来，但是提交的任务总是无法执行。我的配置也是根据网上的相关内容瞎改的，经供参考，以后我还会研读官方文档来实际对每个参数应该的配置做研究。
+        对于hadoop2来说，所有的配置文件都放在hadoop目录下的/etc/hadoop中，下面我贴一下我修改的几个文件：
+        
+        gedit ./etc/hadoop/core-site.xml
+        core-site.xml:
+        <?xml version="1.0" encoding="UTF-8"?>
+		<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+		<!--
+		  Licensed under the Apache License, Version 2.0 (the "License");
+		  you may not use this file except in compliance with the License.
+		  You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+		  Unless required by applicable law or agreed to in writing, software
+		  distributed under the License is distributed on an "AS IS" BASIS,
+		  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+		  See the License for the specific language governing permissions and
+		  limitations under the License. See accompanying LICENSE file.
+		-->
+
+		<!-- Put site-specific property overrides in this file. -->
+		<configuration>
+			    <property>
+			         <name>hadoop.tmp.dir</name>
+			         <value>file:/usr/local/hadoop/tmp</value>
+			         <description>Abase for other temporary directories.</description>
+			    </property>
+			    <property>
+			         <name>fs.defaultFS</name>
+			         <value>hdfs://localhost:9000</value>
+			    </property>
+				<property>  
+					<name>fs.default.name</name>  
+					<value>hdfs://127.0.0.1:9000</value>  
+				</property>
+		</configuration>
+		
+		
+    	gedit ./etc/hadoop/hdfs-site.xml
+    	hdfs-site.xml:
+    	<?xml version="1.0" encoding="UTF-8"?>
+		<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+		<!--
+		  Licensed under the Apache License, Version 2.0 (the "License");
+		  you may not use this file except in compliance with the License.
+		  You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+		  Unless required by applicable law or agreed to in writing, software
+		  distributed under the License is distributed on an "AS IS" BASIS,
+		  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+		  See the License for the specific language governing permissions and
+		  limitations under the License. See accompanying LICENSE file.
+		-->
+
+		<!-- Put site-specific property overrides in this file. -->
+		<configuration>
+			    <property>
+			         <name>dfs.replication</name>
+			         <value>1</value>
+			    </property>
+			    <property>
+			         <name>dfs.namenode.name.dir</name>
+			         <value>file:/usr/local/hadoop/tmp/dfs/name</value>
+			    </property>
+			    <property>
+			         <name>dfs.datanode.data.dir</name>
+			         <value>file:/usr/local/hadoop/tmp/dfs/data</value>
+			    </property>
+		</configuration>
+	
+		配置完成这两部分的文件后，我们就可以进行初步的验证了
+		
+		打开到hadoop的目录，执行下列操作：
+		./bin/hdfs namenode -format
+		成功的话，会看到 “successfully formatted” 和 “Exitting with status 0” 的提示，若为 “Exitting with status 1” 则是出错。
+		
+		./sbin/start-dfs.sh				#开启开启 NameNode 和 DataNode 守护进程。
+		启动完成后，可以通过命令 jps 来判断是否成功启动，若成功启动则会列出如下进程: “NameNode”、”DataNode” 和 “SecondaryNameNode”（如果 SecondaryNameNode 没有启动，请运行 sbin/stop-dfs.sh 关闭进程，然后再次尝试启动尝试）。如果没有 NameNode 或 DataNode ，那就是配置不成功，请仔细检查之前步骤，或通过查看启动日志排查原因。
+		
+		成功启动后，可以访问 Web 界面 http://localhost:50070 查看 NameNode 和 Datanode 信息，还可以在线查看 HDFS 中的文件
+		
+		实例检测：
+		./bin/hdfs dfs -mkdir -p /user/hadoop                    #在 HDFS 中创建用户目录：
+	 	./bin/hdfs dfs -mkdir input                              #在用户目录下创建输入的文件夹
+    	./bin/hdfs dfs -put ./etc/hadoop/*.xml input             #将待输入的文件上传的文件夹中
+    	./bin/hdfs dfs -ls input 								 #查看输入文件夹中的内容
+    	./bin/hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar grep input output 'dfs[a-z.]+' 										 #提交作业 输入为input,将结果输出到output
+    	./bin/hdfs dfs -cat output/*						 #查看输出结果
+    	
+    	
+    	
+    	配置yarn：
+    	mv ./etc/hadoop/mapred-site.xml.template ./etc/hadoop/mapred-site.xml #修改配置文件名
+    	
+    	gedit ./etc/hadoop/mapred-site.xml ：
+    	
+    	mapred-site.xml:
+    	
+    	<?xml version="1.0"?>
+		<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+		<!--
+		  Licensed under the Apache License, Version 2.0 (the "License");
+		  you may not use this file except in compliance with the License.
+		  You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+		  Unless required by applicable law or agreed to in writing, software
+		  distributed under the License is distributed on an "AS IS" BASIS,
+		  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+		  See the License for the specific language governing permissions and
+		  limitations under the License. See accompanying LICENSE file.
+		-->
+
+		<!-- Put site-specific property overrides in this file. -->
+		<configuration>
+			<property>
+				 <name>mapreduce.framework.name</name>
+				 <value>yarn</value>
+			</property>
+
+			<property>
+				　　<name>mapreduce.map.memory.mb</name>
+				　　<value>1000</value>
+			</property>
+			<property>
+				　　<name>mapreduce.map.java.opts</name>
+				　　<value>-Xmx1000M</value>
+			</property>
+			<property>
+				　　<name>mapreduce.reduce.memory.mb</name>
+				　　<value>1000</value>
+			</property>
+			<property>
+				　　<name>mapreduce.reduce.java.opts</name>
+				　　<value>-Xmx1000M</value>
+			</property>
+
+
+
+			<property>
+				<name>mapred.job.tracker</name>
+				<value>master:9001</value>
+			</property>
+		</configuration>
+    	
+		
+		gedit ./etc/hadoop/yarn-site.xml ：
+		
+		
+		yarn-site:
+		<?xml version="1.0"?>
+		<!--
+		  Licensed under the Apache License, Version 2.0 (the "License");
+		  you may not use this file except in compliance with the License.
+		  You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+		  Unless required by applicable law or agreed to in writing, software
+		  distributed under the License is distributed on an "AS IS" BASIS,
+		  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+		  See the License for the specific language governing permissions and
+		  limitations under the License. See accompanying LICENSE file.
+		-->
+		<configuration>
+			<property>
+				 <name>yarn.nodemanager.aux-services</name>
+				 <value>mapreduce_shuffle</value>
+			</property>
+
+
+			<property>
+				<name>yarn.nodemanager.resource.memory-mb</name>
+				<value>3072</value>
+			</property>
+			<property>
+				<name>yarn.nodemanager.resource.cpu-vcores</name>
+				<value>1</value>
+			</property>
+
+		</configuration>
+		
+		在配置完这两个文件后，就可以启动yarn了。
+		还是在hadoop目录下：
+		./sbin/start-dfs.sh（如已启动可以忽略，鄙视必须重启）
+		./sbin/start-yarn.sh      # 启动YARN
+    	./sbin/mr-jobhistory-daemon.sh start historyserver  # 开启历史服务器，才能在Web中查看任务运行情况
+		如果都启动的话，可以通过http://localhost:8088/cluster查看任务运行状态
+		
+		关闭yarn的命令如下：
+		./sbin/stop-yarn.sh
+        ./sbin/mr-jobhistory-daemon.sh stop historyserver	
+        
+        运行任务的方式和刚才相同 都是
+		./bin/hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar grep input output 'dfs[a-z.]+'
+		
+		至此，全工程完成。
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
