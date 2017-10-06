@@ -1,0 +1,155 @@
+Linux的变量种类：
+
+太长不看版：
+系统级：
+/etc/profile：该文件是用户登录时，操作系统定制用户环境时使用的第一个文件，应用于登录到系统的每一个用户。该文件一般是调用/etc/bash.bashrc文件。
+/etc/bash.bashrc：系统级的bashrc文件。
+/etc/environment:在登录时操作系统使用的第二个文件,系统在读取你自己的profile前,设置环境文件的环境变量。
+
+用户级（这些文件处于家目录下）：
+~/.profile:每个用户都可使用该文件输入专用于自己使用的shell信息,当用户登录时,该文件仅仅执行一次!默认情况下,他设置一些环境变量,执行用户的.bashrc文件。这里是推荐放置个人设置的地方
+~/.bashrc:该文件包含专用于你的bash shell的bash信息,当登录时以及每次打开新的shell时,该该文件被读取。不推荐放到这儿，因为每开一个shell，这个文件会读取一次，效率肯定有影响。
+
+按变量的生存周期来划分，Linux变量可分为两类： 
+1 永久的：需要修改配置文件，变量永久生效。 
+2 临时的：使用export命令声明即可，变量在关闭shell时失效。
+
+设置变量的三种方法
+1、控制台中设置，不赞成这种方式，因为他只对当前的shell 起作用，换一个shell设置就无效了：
+
+$PATH="$PATH":/NEW_PATH  (关闭shell Path会还原为原来的path)
+
+2、修改 /etc/profile 文件，如果你的计算机仅仅作为开发使用时推存使用这种方法，因为所有用户的shell都有权使用这个环境变量，可能会给系统带来安全性问题。这里是针对所有的用户的，所有的shell
+
+在/etc/profile的最下面添加：  export  PATH="$PATH:/NEW_PATH"
+
+3、修改bashrc文件，这种方法更为安全，它可以把使用这些环境变量的权限控制到用户级别，这里是针对某一特定的用户，如果你需要给某个用户权限使用这些环境变量，你只需要修改其个人用户主目录下的 .bashrc文件就可以了。
+
+在~/.bashrc文件 最上面添加 export JAVA_HOME=具体的路径
+
+注意，在修改PATH目录时一定不要忘了用:隔开，以免将原来的全部的PATH属性值覆盖
+------------------------------------详细介绍---------------------------------------
+
+常用的环境变量
+
+PATH 决定了shell将到哪些目录中寻找命令或程序 
+HOME 当前用户主目录 
+HISTSIZE　历史记录数 
+LOGNAME 当前用户的登录名 
+HOSTNAME　指主机的名称 
+SHELL 当前用户Shell类型 
+LANGUGE 　语言相关的环境变量，多语言可以修改此环境变量 
+MAIL　当前用户的邮件存放目录 
+PS1　基本提示符，对于root用户是#，对于普通用户是$
+
+
+--------------------来自官方wiki上对于EnvionmentVariables的翻译----------------
+将值设置为环境变量
+为了将值设置为现有的环境变量，我们使用赋值表达式。例如，要将“LANG”变量的值设置为“he_IL.UTF-8”，我们使用以下命令：
+
+LANG = he_IL.UTF -8-
+
+如果我们对不存在的变量使用赋值表达式，shell将创建一个shell变量，它类似于环境变量，但不影响其他应用程序的行为。
+
+可以使用export命令将shell变量导出为环境变量。要创建“EDITOR”环境变量并赋值为“nano”，您可以执行以下操作：
+
+
+EDITOR =nano
+export
+所述的bash shell（Ubuntu中的默认命令行shell）提供了创建环境变量的快捷方式。
+以前的示例可以使用以下单个命令执行：
+
+export EDITOR = nano
+
+
+
+检查环境变量的值
+
+该printenv命令打印所有当前定义的环境变量的名称和值：printenv 
+
+要检查特定变量的值，我们可以将其名称指定为printenv命令：printenv TERM
+
+另一种实现方法是使用美元符号（$），如下例所示：echo $ TERM
+
+有一个临时，短期的环境变化的命令。它也可以用于显示当前环境。这个命令是:ENV
+
+美元符号 $ 实际上可用于组合许多shell命令中环境变量的值。
+例如，以下命令可用于列出当前用户主目录中“桌面”目录的内容:ls $ HOME/Desktop
+
+
+
+移除环境变量
+虽然可以简单地为一个环境变量设置一个空值，如下面的例子所示，可能会在大多数情况下使其效果无效，但是有一些变量，例如“POSIXLY_CORRECT”，即使是空值，也会影响到程序。
+export LC_ALL =
+
+可以使用unset命令来完全消除环境变量的存在
+unset LC_ALL
+
+也可以使用“-n”开关来导出命令，以便导出环境变量，并将其降级为一个shell变量，同时保留它的值。
+
+export -n LC_ALL
+
+
+---进程的局域性---
+环境变量的值都是本地的,这意味着它们是特定的运行过程中或他们。这意味着,如果我们打开两个终端窗口(这意味着我们有两个单独的运行bash进程),然后在其中一个窗口改变某个环境变量的值,在其他窗口或当前桌面上的其他程序中，不会看到shell的更改。
+
+---继承性---
+官网上写了好多，我就不一一翻译了，简单来说是子进程会继承父进程中的环境变量的值。
+举个栗子：我开启了一个shell终端，并使用LANG = 为LANG设置一个新值。然后从这个终端中运行一个gedit，此时的gedit会继承刚才设置的新值。因此可能会显示在与桌面上其余的进程不同的语言。
+		  在上面这个例子中，shell终端相当于parent process，而从这个shell中启动的gedit相当于child process。
+官方还有一个Note: in the Gnome graphical desktop environment, gnome-session is the parent process of all the processes running on the desktop. This fact (along with the Inheritance principle) is the key to our ability to powerfully influence the operation of our desktop with environment variables. The equivalent process in KDE is kde-session.
+				不是很懂，先贴出来哇
+---区分大小写---
+如题，此外有个tips：将所有环境变量命名为只有英文大写字母和下划线（_）的符号是常见的做法。 
+
+
+--技巧--
+在bash的shell有一招，让我们设置一个或多个环境变量并运行一个命令一个子进程。
+例如，为了设置“LANGUAGE”和“FOO”环境变量，然后运行“gedit”，我们将使用以下命令：
+LANGUAGE = he FOO = bar gedit
+
+注意：使用此命令时，新值仅分配给子进程的环境变量（在本例中为gedit）,而shell的变量保留其原始值。
+例如，在上面的例子中，“LANGUAGE”的值不会从其原始值改变，至于对shell的后续命令，则需要再考虑。
+
+通过使用env命令，可以使用其他shell实现类似的行为。
+
+
+---持久型环境变量设置---
+fort a particular user (rather than the system as a whole) are ~/.pam_environment and ~/.profile. 
+After having edited one of those files, you should re-login in order to initialize the variables.
+
+对特定用户，通常设置环境变量的文件是~/.pam_environment and ~/.profile，在设置完毕后应重启系统以应用设置。
+
+~/.pam_environment
+此文件专门用于设置用户的环境。它不是脚本文件，而是由赋值表达式组成，每行一个。此示例将变量FOO设置为文字字符串并修改PATH变量：
+FOO = bar
+PATH DEFAULT = ${PATH}:/home/@{PAM_USER}/MyPrograms
+注意：
+	1、当做一个简单的变量赋值像FOO = bar的例子时，引号没有什么特别的意义。这意味着值不能包含空格。
+	2、用于修改PATH的语法（与shell脚本文件的语法不同）是变量扩展工作所必需的。一些变量，如HOME，可能不会在~/.pam_environment被解析时设置。有关详细信息，请参阅/etc/security/pam_env.conf。
+	3、当您使用不同的gui来设置语言或区域格式时，会将修改写入~/.pam_environment。因此，如果您通过编辑 ~/.pam_environment来手动 set LC_TIME,
+	   如果以后使用语言支持GUI来更改区域格式设置，那么您的条目将被覆盖。
+
+
+~/.profile文件
+在此文件中，您还可以设置环境变量，因为在Ubuntu启动过程中，文件由DisplayManager自动执行，以及从控制台登录时由shell执行。这是一个~/.profile等价于上面的例子：
+export FOO = bar
+export PATH =“$ PATH：$ HOME / MyPrograms”
+注意：~/.profile中的代码在读取~/.pam_environment之后运行。如果您想要覆盖在~/.pam_environmen中设置的与语言环境相关的变量，这使得~/.profile更适合使用。
+
+---other files---
+Shell config files such as ~/.bashrc, ~/.bash_profile, and ~/.bash_login are often suggested for setting environment variables. While this may work on Bash shells for programs started from the shell, variables set in those files are not available by default to programs started from the graphical environment in a desktop session.
+~/.bashrc, ~/.bash_profile, and ~/.bash_login 这三个是建议使用作为设置环境变量的文件(大部分用的第一个)
+
+---全局系统变量---
+虽然/etc/profile经常被建议用于系统环境变量设置，但它是基础文件包的配置文件，因此直接编辑该文件是不合适的。
+请使用/etc/profile.d中的文件
+/etc/profile 是系统文件，具有系统的写保护。如果想编辑该文件的内容，请在打开编辑的时候加上 sudo或以root访问，
+在保存前一定要检查好编辑的变量是否正确，以防出错，我已经因为改错导致系统崩溃了不知道多少次了。
+
+	   
+	   
+参考：
+http://www.linuxidc.com/Linux/2015-01/111459.htm
+http://www.linuxidc.com/Linux/2015-08/121192.htm
+官方wiki：https://help.ubuntu.com/community/EnvironmentVariables
