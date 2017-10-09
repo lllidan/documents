@@ -1,0 +1,9 @@
+Scrapy简析(来源网络)
+来源：http://www.jb51.net/article/57183.htm
+
+scrapy.cfg：项目的配置文件
+tutorial/：项目的Python模块，将会从这里引用代码
+tutorial/items.py：项目的items文件
+tutorial/pipelines.py：项目的pipelines文件
+tutorial/settings.py：项目的设置文件
+tutorial/spiders/：存储爬虫的目录

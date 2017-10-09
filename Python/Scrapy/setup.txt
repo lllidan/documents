@@ -1,0 +1,3 @@
+http://blog.csdn.net/ljp812184246/article/details/52817046
+从anaconda中带着的管理器进行安装
+
