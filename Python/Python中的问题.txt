@@ -1,0 +1,5 @@
+Python3拾遗：
+----------------------------------20171009--------------------------------------
+1、 Python3取消了raw_input()函数
+2、 Python中的字符串不能用下表的方式改变摸个位置上的值
+	ep:a="abc" a[0]='c'#false 会报'str' object does not support item assignment的错误
