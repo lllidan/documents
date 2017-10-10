@@ -1,0 +1,26 @@
+块注释/块反注释 Ctrl + 4/5 
+断点设置 F12 
+关闭所有 Ctrl + Shift + W 
+代码完成 Ctrl +空格键 
+条件断点 SHIFT + F12 
+配置 F6 
+复制 Ctrl + C 
+向下复制 Ctrl + Alt +向下 
+剪切 Ctrl + X 
+调试 Ctrl + F5键 
+删除 Del 
+向上复制 Ctrl + Alt +向上 
+粘贴 Ctrl + V 
+前光标位置 Ctrl + Alt +左 
+重新运行一个脚本 Ctrl + F6 
+反撤销        Ctrl + Y 
+反撤销        Ctrl + Z 
+运行           F5 
+运行选择F9 
+保存所有  Ctrl + Alt + S 
+保存为     Ctrl + Alt + S 
+保存文件  Ctrl + S 
+全选        Ctrl + A 
+注释/反注释  Ctrl + 1 
+运行步差    F10 
+运行分析    F8
