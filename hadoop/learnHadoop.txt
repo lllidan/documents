@@ -1,15 +1,20 @@
 -------------------20170925------------
-hadoop�޷��� start-all.h����
-    ���������(�鿴hadoopĿ¼�µ�logs�ļ����е���־��Ϣ
-        1����������ļ��Ƿ���д��ȷ
-		2�����¸�ʽ��
-hadoop����eclipse��bin�µĽű��Լ������ļ�����ʧ
-	�����������δ���
+hadoop无法以 start-all.h启动
+    解决方法：(查看hadoop目录下的logs文件夹中的日志信息
+        1、检查配置文件是否书写正确
+		2、重新格式化
+hadoop导入eclipse后bin下的脚本以及其他文件会消失
+	解决方法：尚未解决
 could only be replicated to 0 nodes, instead of 1
-	���������
-hadoop1.x.x����Java7  hadoop2.x.x����Java8
-hadoop2.x.x�Ķ��ε�eclipse���Ӧ�ÿ���ͨ�ã��ҵ�hadoop�汾��2.7.4��eclipse�汾��oxygen����װ�Ĳ�������ϱ���õ�2.6.0�Ĳ����Ŀǰ��������ʹ�ã�
-û�з������⡣
+	解决方法：
+hadoop1.x.x搭配Java7  hadoop2.x.x搭配Java8
+hadoop2.x.x的二次的eclipse插件应该可以通用：我的hadoop版本是2.7.4，eclipse版本是oxygen，安装的插件是网上编译好的2.6.0的插件，目前可以正常使用，
+没有发现问题。
+
+--------------------------20171017----------------------------------------------
+linux配置Java变量：使用 sudo 命令解压。同理，在配置eclipse，解压出来不可以直接运行，需要使用命令行工具，在Eclipse
+文件夹下，用shell命令创建一个指向JDK目录下的JRE文件夹的软连接，否则无法运行。
+
 
 
 		
