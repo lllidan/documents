@@ -1,8 +1,9 @@
 一些好书：
 	计算机：
 		C与指针
-		head first Java(同学推荐的)
+		head first Java(同学、老师和豆瓣推荐的)
+		计算机网络 自顶向下方法(Computer Networking A Top-Down Approach Sixth Edition)
 	数学：
-		概率论基础教程
+		概率论基础教程(A First Course in Probability)
 	小说：
 		远方的来客
